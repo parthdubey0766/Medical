@@ -4,10 +4,12 @@ import { successResponse, errorResponse } from '@/lib/apiResponse';
 export async function POST(request) {
   try {
     const { password } = await request.json();
-    
-    // In production, you would set ADMIN_PASSWORD in your environment variables.
-    // For this dev environment, we'll allow "admin123" if the env var isn't set.
-    const validPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+    // Require an explicit environment variable and avoid any hardcoded fallback secrets.
+    const validPassword = process.env.ADMIN_PASSWORD;
+    if (!validPassword) {
+      return errorResponse('Admin login is not configured', 503);
+    }
 
     if (password === validPassword) {
       cookies().set({
