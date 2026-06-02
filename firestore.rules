@@ -1,0 +1,67 @@
+// Firestore Security Rules
+// Deploy with: firebase deploy --only firestore:rules
+//
+// These rules follow the principle of least privilege:
+// - Public can only READ available slots
+// - All writes go through server-side API routes (Firebase Admin)
+// - No direct client writes to sensitive collections
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===========================
+    // AVAILABLE SLOTS
+    // ===========================
+    // Public read: anyone can view available time slots
+    // Write: server-only (via Admin SDK in API routes)
+    match /availableSlots/{date} {
+      allow read: if true;
+      allow write: if false; // Only Admin SDK can write
+    }
+
+    // ===========================
+    // APPOINTMENTS
+    // ===========================
+    // No public access — all operations via Admin SDK
+    // Contains PHI: name, phone, email, medical reason
+    match /appointments/{appointmentId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // ===========================
+    // CONTACTS
+    // ===========================
+    // No public access — all operations via Admin SDK
+    match /contacts/{contactId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // ===========================
+    // CONSENT LOGS
+    // ===========================
+    // No public access — audit trail, immutable
+    match /consentLogs/{logId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // ===========================
+    // DPDP REQUESTS
+    // ===========================
+    // No public access — compliance records
+    match /dpdpRequests/{requestId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // ===========================
+    // DEFAULT: DENY ALL
+    // ===========================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
