@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
+const isGithubPagesBuild = process.env.GITHUB_PAGES === 'true';
+
 const nextConfig = {
+  ...(isGithubPagesBuild
+    ? {
+        output: 'export',
+        basePath: '/Medical',
+        assetPrefix: '/Medical/',
+      }
+    : {}),
+
   // --- Security Headers ---
   async headers() {
     return [
@@ -85,6 +95,7 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [375, 480, 768, 1024, 1440, 1920],
+    unoptimized: isGithubPagesBuild,
   },
 
   // --- Performance ---
