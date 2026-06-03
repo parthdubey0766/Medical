@@ -1,12 +1,20 @@
 /** @type {import('next').NextConfig} */
 const isGithubPagesBuild = process.env.GITHUB_PAGES === 'true';
+const githubPagesBasePath = process.env.GITHUB_PAGES_BASE_PATH;
+const normalizedGithubPagesBasePath = githubPagesBasePath
+  ? `/${githubPagesBasePath.replace(/^\/+|\/+$/g, '')}`
+  : '';
 
 const nextConfig = {
   ...(isGithubPagesBuild
     ? {
         output: 'export',
-        basePath: '/Medical',
-        assetPrefix: '/Medical/',
+        ...(normalizedGithubPagesBasePath
+          ? {
+              basePath: normalizedGithubPagesBasePath,
+              assetPrefix: `${normalizedGithubPagesBasePath}/`,
+            }
+          : {}),
       }
     : {}),
 
