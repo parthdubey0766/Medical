@@ -3,8 +3,16 @@
  * 
  * Standardised JSON response format for all API endpoints.
  * Ensures consistent error handling and response structure.
+ * Each response includes a unique request ID for debugging.
  */
 import { NextResponse } from 'next/server';
+
+/**
+ * Generate a short unique request ID.
+ */
+function generateRequestId() {
+  return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+}
 
 /**
  * Send a success response.
@@ -16,6 +24,7 @@ export function successResponse(data, status = 200) {
     {
       success: true,
       data,
+      requestId: generateRequestId(),
       timestamp: new Date().toISOString(),
     },
     { status }
@@ -35,6 +44,7 @@ export function errorResponse(message, status = 400, errors = null) {
       message,
       ...(errors && { details: errors }),
     },
+    requestId: generateRequestId(),
     timestamp: new Date().toISOString(),
   };
 
@@ -83,6 +93,7 @@ export function methodNotAllowedResponse(allowed = []) {
       error: {
         message: `Method not allowed. Allowed: ${allowed.join(', ')}`,
       },
+      requestId: generateRequestId(),
       timestamp: new Date().toISOString(),
     },
     {

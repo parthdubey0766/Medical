@@ -96,3 +96,6 @@ export const slotLimiter = rateLimit({ interval: 60_000, limit: 30 });
 
 /** DPDP data requests: 2 per minute per IP */
 export const dataRequestLimiter = rateLimit({ interval: 60_000, limit: 2 });
+
+/** Admin login: 5 attempts per 15 minutes per IP (strict — prevents brute force) */
+export const adminLoginLimiter = rateLimit({ interval: 15 * 60_000, limit: 5 });

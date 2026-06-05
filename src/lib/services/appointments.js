@@ -6,7 +6,7 @@
  * Switches between Firestore and mock data based on USE_MOCK_DATA env var.
  */
 import { adminDb } from '@/lib/firebaseAdmin';
-import { addMockAppointment, getMockAppointments } from '@/lib/mockData';
+import { addMockAppointment, getMockAppointments, deleteMockAppointment } from '@/lib/mockData';
 import { generateBookingRef, normalizePhone, sanitizeObject } from '@/lib/sanitize';
 import { markSlotBooked, isSlotAvailable } from './slots';
 
@@ -232,6 +232,31 @@ export async function getAllAppointments() {
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('[AppointmentsService] Error fetching all appointments:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a single appointment by ID (Admin only).
+ * @param {string} id - Document ID
+ * @returns {Promise<boolean>} True if deleted
+ */
+export async function deleteAppointmentById(id) {
+  if (IS_MOCK) {
+    const deleted = deleteMockAppointment(id);
+    console.log(`[Mock] Appointment ${id} ${deleted ? 'deleted' : 'not found'}`);
+    return deleted;
+  }
+
+  try {
+    const docRef = adminDb.collection('appointments').doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists) return false;
+    await docRef.delete();
+    console.log(`[AppointmentsService] Deleted appointment: ${id}`);
+    return true;
+  } catch (error) {
+    console.error('[AppointmentsService] Error deleting appointment:', error);
     throw error;
   }
 }

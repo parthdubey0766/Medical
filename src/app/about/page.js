@@ -4,8 +4,8 @@ import styles from "@/components/site.module.css";
 import { DOCTOR_INFO } from "@/lib/mockData";
 
 export const metadata = {
-  title: "About Dr. Parth | Parth's Medical Clinic",
-  description: "Learn about Dr. Parth's qualifications, experience, and approach to care.",
+  title: "About Dr. Parth",
+  description: "Learn about Dr. Parth's qualifications, 15+ years of experience in internal medicine and diabetology, and his patient-first approach to care in Gurugram.",
 };
 
 const qualifications = [

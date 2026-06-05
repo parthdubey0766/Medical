@@ -3,8 +3,8 @@ import styles from "@/components/site.module.css";
 import { CLINIC_INFO } from "@/lib/mockData";
 
 export const metadata = {
-  title: "Contact | Parth's Medical Clinic",
-  description: "Contact Parth's Medical Clinic in Gurugram for appointments and inquiries.",
+  title: "Contact",
+  description: "Contact Parth's Medical Clinic in Gurugram — phone, email, WhatsApp, and location map. We respond to all inquiries within 24 hours.",
 };
 
 export default function ContactPage() {

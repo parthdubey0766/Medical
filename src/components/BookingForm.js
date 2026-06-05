@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { generateMockSlots } from "@/lib/mockData";
+import { IS_PREVIEW_SITE } from "@/lib/runtime";
 import styles from "./site.module.css";
 
 const reasons = [
@@ -42,6 +44,17 @@ function formatTime(time) {
   }).format(new Date(2026, 0, 1, hours, minutes));
 }
 
+function formatDate(dateString) {
+  if (!dateString) return "Choose a date";
+
+  return new Intl.DateTimeFormat("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(`${dateString}T12:00:00`));
+}
+
 function getApiMessage(payload) {
   if (payload?.error?.details?.length) {
     return payload.error.details.map((item) => item.message).join(" ");
@@ -49,10 +62,19 @@ function getApiMessage(payload) {
   return payload?.error?.message || payload?.data?.message || "Something went wrong. Please try again.";
 }
 
+function getPreviewSlot(preferredTimeSlot) {
+  if (!preferredTimeSlot) return "Choose an available slot";
+
+  const [start] = preferredTimeSlot.split("-");
+  return formatTime(start);
+}
+
 export default function BookingForm() {
   const [dateBounds] = useState(getDateBounds);
-  const [slots, setSlots] = useState([]);
-  const [slotsLoading, setSlotsLoading] = useState(true);
+  const [slots, setSlots] = useState(() =>
+    IS_PREVIEW_SITE ? generateMockSlots(getDateBounds().min) : []
+  );
+  const [slotsLoading, setSlotsLoading] = useState(!IS_PREVIEW_SITE);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const [form, setForm] = useState(() => ({
@@ -69,6 +91,8 @@ export default function BookingForm() {
   }));
 
   useEffect(() => {
+    if (IS_PREVIEW_SITE) return;
+
     if (!form.preferredDate) return;
 
     const controller = new AbortController();
@@ -100,7 +124,7 @@ export default function BookingForm() {
     if (name === "preferredDate") {
       setSlotsLoading(true);
       setStatus(null);
-      setSlots([]);
+      setSlots(IS_PREVIEW_SITE ? generateMockSlots(value) : []);
       setForm((current) => ({
         ...current,
         preferredDate: value,
@@ -119,6 +143,15 @@ export default function BookingForm() {
     event.preventDefault();
     setSubmitting(true);
     setStatus(null);
+
+    if (IS_PREVIEW_SITE) {
+      setStatus({
+        kind: "success",
+        message: "Preview mode only: bookings are not sent from GitHub Pages. Use the live clinic backend to confirm appointments.",
+      });
+      setSubmitting(false);
+      return;
+    }
 
     const payload = {
       ...form,
@@ -288,6 +321,39 @@ export default function BookingForm() {
           maxLength={500}
         />
       </div>
+
+      <section className={styles.previewCard} aria-live="polite">
+        <div className={styles.previewHeader}>
+          <span className={styles.previewEyebrow}>Live preview</span>
+          <strong>Appointment summary</strong>
+        </div>
+        <dl className={styles.previewList}>
+          <div>
+            <dt>Name</dt>
+            <dd>{form.name || "Your full name"}</dd>
+          </div>
+          <div>
+            <dt>Phone</dt>
+            <dd>{form.phone || "+91-"}</dd>
+          </div>
+          <div>
+            <dt>Visit reason</dt>
+            <dd>{form.reason}</dd>
+          </div>
+          <div>
+            <dt>Date</dt>
+            <dd>{formatDate(form.preferredDate)}</dd>
+          </div>
+          <div>
+            <dt>Slot</dt>
+            <dd>{getPreviewSlot(form.preferredTimeSlot)}</dd>
+          </div>
+          <div>
+            <dt>Notes</dt>
+            <dd>{form.notes ? form.notes : "No extra notes yet"}</dd>
+          </div>
+        </dl>
+      </section>
 
       <label className={styles.checkboxField}>
         <input

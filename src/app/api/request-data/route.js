@@ -23,11 +23,22 @@ import { dataRequestLimiter } from '@/lib/rateLimit';
 import { notifyDpdpRequest } from '@/lib/services/notifications';
 import { normalizePhone, maskEmail, maskPhone } from '@/lib/sanitize';
 import { addMockDataRequest } from '@/lib/mockData';
+import { IS_PREVIEW_SITE } from '@/lib/runtime';
 
 const IS_MOCK = process.env.USE_MOCK_DATA === 'true';
 
 export async function POST(request) {
   try {
+    if (IS_PREVIEW_SITE) {
+      return successResponse({
+        requestId: 'PREVIEW-DPDP',
+        requestType: 'access',
+        message: 'Preview mode request captured locally only.',
+        recordsFound: 0,
+        data: [],
+      }, 201);
+    }
+
     // 1. Rate limit check (strict: 2 per minute)
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const { success: withinLimit } = dataRequestLimiter.check(ip);

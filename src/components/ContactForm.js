@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IS_PREVIEW_SITE } from "@/lib/runtime";
 import styles from "./site.module.css";
 
 function getApiMessage(payload) {
@@ -29,6 +30,15 @@ export default function ContactForm() {
     event.preventDefault();
     setSubmitting(true);
     setStatus(null);
+
+    if (IS_PREVIEW_SITE) {
+      setStatus({
+        kind: "success",
+        message: "Preview mode only: this form does not submit from GitHub Pages. Use the contact details shown on the page.",
+      });
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/contact", {

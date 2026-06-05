@@ -18,14 +18,58 @@ function getAdminApp() {
     return null;
   }
 
-  return initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      // Private key comes as a string with literal \n — parse them
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
+  // Fail fast: validate required credentials before attempting init
+  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+
+  if (!projectId || !clientEmail || !privateKey) {
+    const missing = [];
+    if (!projectId) missing.push('FIREBASE_ADMIN_PROJECT_ID');
+    if (!clientEmail) missing.push('FIREBASE_ADMIN_CLIENT_EMAIL');
+    if (!privateKey) missing.push('FIREBASE_ADMIN_PRIVATE_KEY');
+
+    console.error(
+      `[Firebase Admin] Missing required environment variables: ${missing.join(', ')}.\n` +
+      'Either set USE_MOCK_DATA=true for development, or configure Firebase Admin credentials.\n' +
+      'See .env.local.example for required variables.'
+    );
+
+    // In production, throw so the deployment fails visibly
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(`Firebase Admin SDK misconfigured. Missing: ${missing.join(', ')}`);
+    }
+
+    return null;
+  }
+
+  try {
+    return initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        // Private key comes as a string with literal \n — parse them
+        privateKey: privateKey.replace(/\\n/g, '\n'),
+      }),
+    });
+  } catch (error) {
+    console.error('[Firebase Admin] Initialization failed:', error.message);
+
+    if (error.message.includes('private_key')) {
+      console.error(
+        '[Firebase Admin] Hint: The private key format may be incorrect.\n' +
+        'Make sure the FIREBASE_ADMIN_PRIVATE_KEY env var contains the full PEM key\n' +
+        'including "-----BEGIN PRIVATE KEY-----" and "-----END PRIVATE KEY-----".\n' +
+        'In Vercel, paste the key as-is — Vercel handles multi-line values correctly.'
+      );
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+
+    return null;
+  }
 }
 
 const adminApp = getAdminApp();

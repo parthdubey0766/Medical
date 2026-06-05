@@ -695,6 +695,58 @@
   color: #b91c1c;
 }
 
+.previewCard {
+  display: grid;
+  gap: var(--space-md);
+  border: 1px solid var(--color-primary-100);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  background: linear-gradient(180deg, rgba(236, 253, 245, 0.92), rgba(255, 255, 255, 0.98));
+}
+
+.previewHeader {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.previewEyebrow {
+  color: var(--color-primary-dark);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.previewHeader strong {
+  color: var(--color-gray-900);
+  font-size: 1.05rem;
+}
+
+.previewList {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.previewList div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.previewList dt {
+  color: var(--color-gray-500);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.previewList dd {
+  color: var(--color-gray-900);
+  font-weight: 650;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
 .asidePanel {
   display: grid;
   gap: var(--space-lg);

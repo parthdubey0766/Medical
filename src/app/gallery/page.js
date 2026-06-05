@@ -3,8 +3,8 @@ import Link from "next/link";
 import styles from "@/components/site.module.css";
 
 export const metadata = {
-  title: "Gallery | Parth's Medical Clinic",
-  description: "View clinic spaces and explore the patient journey.",
+  title: "Clinic Tour",
+  description: "Take a virtual tour of Parth's Medical Clinic — view the reception, waiting area, and consultation room before your visit.",
 };
 
 const gallery = [

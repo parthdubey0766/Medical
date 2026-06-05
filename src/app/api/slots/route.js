@@ -9,9 +9,28 @@ import { getSlotsByDate } from '@/lib/services/slots';
 import { slotQuerySchema, validateInput } from '@/lib/validation';
 import { successResponse, errorResponse, validationErrorResponse, rateLimitResponse, serverErrorResponse } from '@/lib/apiResponse';
 import { slotLimiter } from '@/lib/rateLimit';
+import { IS_PREVIEW_SITE } from '@/lib/runtime';
+import { generateMockSlots } from '@/lib/mockData';
 
 export async function GET(request) {
   try {
+    if (IS_PREVIEW_SITE) {
+      const { searchParams } = new URL(request.url);
+      const date = searchParams.get('date');
+      if (!date) {
+        return errorResponse('Missing required parameter: date', 400);
+      }
+
+      const slots = generateMockSlots(date);
+      return successResponse({
+        date,
+        clinicOpen: slots.length > 0,
+        totalSlots: slots.length,
+        availableSlots: slots.filter((slot) => slot.available).length,
+        slots,
+      });
+    }
+
     // 1. Rate limit check
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const { success: withinLimit } = slotLimiter.check(ip);

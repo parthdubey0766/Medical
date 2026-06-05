@@ -1,5 +1,19 @@
+const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+const repositoryName = process.env.GITHUB_REPOSITORY?.split('/')?.pop();
+const basePath = isGitHubPages && repositoryName ? `/${repositoryName}` : undefined;
+const shouldExport = process.env.NEXT_PUBLIC_PREVIEW_MODE === 'true';
+
+// Determine the site URL for CORS and CSP
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
+);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: shouldExport ? 'export' : undefined,
+  trailingSlash: shouldExport,
+  basePath,
+  assetPrefix: basePath,
   // --- Security Headers ---
   async headers() {
     return [
@@ -45,7 +59,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
-              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://api.resend.com",
+              `connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://api.resend.com ${siteUrl}`,
               "frame-src 'self' https://www.google.com https://maps.google.com",
               "object-src 'none'",
               "base-uri 'self'",
@@ -61,11 +75,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+            value: siteUrl,
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, OPTIONS',
+            value: 'GET, POST, DELETE, OPTIONS',
           },
           {
             key: 'Access-Control-Allow-Headers',
@@ -83,6 +97,7 @@ const nextConfig = {
 
   // --- Image Optimization ---
   images: {
+    unoptimized: shouldExport,
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [375, 480, 768, 1024, 1440, 1920],
   },

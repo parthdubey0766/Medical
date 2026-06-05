@@ -3,8 +3,8 @@ import styles from "@/components/site.module.css";
 import { CLINIC_INFO } from "@/lib/mockData";
 
 export const metadata = {
-  title: "Book Appointment | Parth's Medical Clinic",
-  description: "Choose an available appointment slot and confirm your visit with Dr. Parth.",
+  title: "Book Appointment",
+  description: "Book an appointment online with Dr. Parth in Gurugram. Choose your preferred date and time slot, receive instant confirmation via email and SMS.",
 };
 
 export default function BookPage() {

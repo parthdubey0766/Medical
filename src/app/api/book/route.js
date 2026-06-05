@@ -18,9 +18,27 @@ import {
 import { bookingLimiter } from '@/lib/rateLimit';
 import { notifyBookingConfirmation } from '@/lib/services/notifications';
 import { maskEmail, maskPhone } from '@/lib/sanitize';
+import { IS_PREVIEW_SITE } from '@/lib/runtime';
 
 export async function POST(request) {
   try {
+    if (IS_PREVIEW_SITE) {
+      return successResponse(
+        {
+          bookingRef: 'PREVIEW-BOOKING',
+          appointment: {
+            name: 'Preview User',
+            preferredDate: new Date().toISOString().slice(0, 10),
+            preferredTimeSlot: '09:00-09:15',
+            reason: 'General consultation',
+            status: 'preview',
+          },
+          message: 'Preview mode booking captured locally only.',
+        },
+        201
+      );
+    }
+
     // 1. Rate limit check
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const { success: withinLimit } = bookingLimiter.check(ip);

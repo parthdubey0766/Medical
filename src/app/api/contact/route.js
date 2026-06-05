@@ -16,9 +16,17 @@ import {
 } from '@/lib/apiResponse';
 import { contactLimiter } from '@/lib/rateLimit';
 import { notifyContactSubmission } from '@/lib/services/notifications';
+import { IS_PREVIEW_SITE } from '@/lib/runtime';
 
 export async function POST(request) {
   try {
+    if (IS_PREVIEW_SITE) {
+      return successResponse({
+        message: 'Preview mode contact captured locally only.',
+        contactId: 'PREVIEW-CONTACT',
+      }, 201);
+    }
+
     // 1. Rate limit check
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const { success: withinLimit } = contactLimiter.check(ip);

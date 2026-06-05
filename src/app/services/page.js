@@ -3,8 +3,8 @@ import styles from "@/components/site.module.css";
 import { SERVICES } from "@/lib/mockData";
 
 export const metadata = {
-  title: "Services | Parth's Medical Clinic",
-  description: "Explore general medicine, diabetes care, respiratory care, preventive health, and more.",
+  title: "Services",
+  description: "Comprehensive medical services: general medicine, diabetes management, cardiology screening, respiratory care, preventive health check-ups, and geriatric care in Gurugram.",
 };
 
 const serviceCodes = {

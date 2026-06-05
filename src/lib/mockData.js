@@ -250,6 +250,20 @@ export function addMockContact(contact) {
   return newContact;
 }
 
+export function deleteMockAppointment(id) {
+  const index = mockAppointments.findIndex((a) => a.id === id);
+  if (index === -1) return false;
+  mockAppointments.splice(index, 1);
+  return true;
+}
+
+export function deleteMockContact(id) {
+  const index = mockContacts.findIndex((c) => c.id === id);
+  if (index === -1) return false;
+  mockContacts.splice(index, 1);
+  return true;
+}
+
 export function addMockDataRequest(request) {
   const newRequest = {
     id: `mock-dpdp-${Date.now()}`,

@@ -5,7 +5,7 @@
  * Stores in Firestore (or mock) and triggers notifications.
  */
 import { adminDb } from '@/lib/firebaseAdmin';
-import { addMockContact } from '@/lib/mockData';
+import { addMockContact, deleteMockContact } from '@/lib/mockData';
 import { sanitizeObject, normalizePhone } from '@/lib/sanitize';
 
 const IS_MOCK = process.env.USE_MOCK_DATA === 'true';
@@ -77,6 +77,31 @@ export async function getAllContacts() {
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('[ContactsService] Error fetching all contacts:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a single contact by ID (Admin only).
+ * @param {string} id - Document ID
+ * @returns {Promise<boolean>} True if deleted
+ */
+export async function deleteContactById(id) {
+  if (IS_MOCK) {
+    const deleted = deleteMockContact(id);
+    console.log(`[Mock] Contact ${id} ${deleted ? 'deleted' : 'not found'}`);
+    return deleted;
+  }
+
+  try {
+    const docRef = adminDb.collection('contacts').doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists) return false;
+    await docRef.delete();
+    console.log(`[ContactsService] Deleted contact: ${id}`);
+    return true;
+  } catch (error) {
+    console.error('[ContactsService] Error deleting contact:', error);
     throw error;
   }
 }

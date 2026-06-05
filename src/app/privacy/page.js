@@ -2,8 +2,8 @@ import DataRequestForm from "@/components/DataRequestForm";
 import styles from "@/components/site.module.css";
 
 export const metadata = {
-  title: "Privacy and Data Requests | Parth's Medical Clinic",
-  description: "Request access to or erasure of appointment data held by Parth's Medical Clinic.",
+  title: "Privacy & Data Requests",
+  description: "Request access to or erasure of your personal appointment data under the DPDP Act 2023. Parth's Medical Clinic handles all requests within 72 hours.",
 };
 
 export default function PrivacyPage() {
