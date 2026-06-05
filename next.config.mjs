@@ -1,5 +1,23 @@
 /** @type {import('next').NextConfig} */
+const isGithubPagesBuild = process.env.GITHUB_PAGES === 'true';
+const githubPagesBasePath = process.env.GITHUB_PAGES_BASE_PATH;
+const normalizedGithubPagesBasePath = githubPagesBasePath
+  ? `/${githubPagesBasePath.replace(/^\/+|\/+$/g, '')}`
+  : '';
+
 const nextConfig = {
+  ...(isGithubPagesBuild
+    ? {
+        output: 'export',
+        ...(normalizedGithubPagesBasePath
+          ? {
+              basePath: normalizedGithubPagesBasePath,
+              assetPrefix: `${normalizedGithubPagesBasePath}/`,
+            }
+          : {}),
+      }
+    : {}),
+
   // --- Security Headers ---
   async headers() {
     return [
@@ -85,6 +103,7 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [375, 480, 768, 1024, 1440, 1920],
+    unoptimized: isGithubPagesBuild,
   },
 
   // --- Performance ---

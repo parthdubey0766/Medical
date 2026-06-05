@@ -37,6 +37,16 @@ npm run dev
 - `npm run start` - run production server
 - `npm run lint` - run lint checks
 
+## Deploy to GitHub Pages
+
+- A workflow is available at `.github/workflows/deploy-pages.yml`.
+- Enable Pages from **Settings → Pages → Build and deployment → GitHub Actions**.
+- Push to `main` to trigger deployment.
+
+### Important limitation
+
+This project includes Next.js API routes in `src/app/api`. GitHub Pages only serves static files, so API endpoints will not run there. The UI pages will be deployed, but server-side API features need a server-capable platform (for example Vercel, Render, or similar).
+
 ## Project Structure
 
 - `src/app` - pages and API routes
