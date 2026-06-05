@@ -8,9 +8,16 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
-function getAdminApp() {
+let cachedAdminApp = null;
+let cachedAdminDb = null;
+
+function getAdminAppInstance() {
   if (getApps().length > 0) {
     return getApps()[0];
+  }
+
+  if (cachedAdminApp) {
+    return cachedAdminApp;
   }
 
   // In mock mode, we don't initialize real Firebase Admin
@@ -18,7 +25,7 @@ function getAdminApp() {
     return null;
   }
 
-  // Fail fast: validate required credentials before attempting init
+  // Validate required credentials before attempting init
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
@@ -29,22 +36,17 @@ function getAdminApp() {
     if (!clientEmail) missing.push('FIREBASE_ADMIN_CLIENT_EMAIL');
     if (!privateKey) missing.push('FIREBASE_ADMIN_PRIVATE_KEY');
 
-    console.error(
+    console.warn(
       `[Firebase Admin] Missing required environment variables: ${missing.join(', ')}.\n` +
       'Either set USE_MOCK_DATA=true for development, or configure Firebase Admin credentials.\n' +
       'See .env.local.example for required variables.'
     );
 
-    // In production, throw so the deployment fails visibly
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error(`Firebase Admin SDK misconfigured. Missing: ${missing.join(', ')}`);
-    }
-
     return null;
   }
 
   try {
-    return initializeApp({
+    cachedAdminApp = initializeApp({
       credential: cert({
         projectId,
         clientEmail,
@@ -52,6 +54,7 @@ function getAdminApp() {
         privateKey: privateKey.replace(/\\n/g, '\n'),
       }),
     });
+    return cachedAdminApp;
   } catch (error) {
     console.error('[Firebase Admin] Initialization failed:', error.message);
 
@@ -64,25 +67,63 @@ function getAdminApp() {
       );
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      throw error;
-    }
-
     return null;
   }
 }
 
-const adminApp = getAdminApp();
-
-/**
- * Get Firestore Admin instance.
- * Returns null in mock mode — callers should check USE_MOCK_DATA.
- */
-function getAdminDb() {
-  if (!adminApp) return null;
-  return getFirestore(adminApp);
+function getAdminDbInstance() {
+  if (cachedAdminDb) {
+    return cachedAdminDb;
+  }
+  const app = getAdminAppInstance();
+  if (!app) return null;
+  cachedAdminDb = getFirestore(app);
+  return cachedAdminDb;
 }
 
-const adminDb = getAdminDb();
+// Helper to throw detailed configuration error at runtime
+function throwConfigurationError() {
+  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  const missing = [];
+  if (!projectId) missing.push('FIREBASE_ADMIN_PROJECT_ID');
+  if (!clientEmail) missing.push('FIREBASE_ADMIN_CLIENT_EMAIL');
+  if (!privateKey) missing.push('FIREBASE_ADMIN_PRIVATE_KEY');
+
+  throw new Error(
+    `Firebase Admin SDK misconfigured. Missing: ${missing.join(', ')}. ` +
+    `Please configure these environment variables in your Vercel project settings.`
+  );
+}
+
+// Proxies to intercept accesses at runtime and check/throw then
+const adminApp = new Proxy({}, {
+  get(target, prop) {
+    const app = getAdminAppInstance();
+    if (!app) {
+      if (process.env.USE_MOCK_DATA === 'true') {
+        return null;
+      }
+      throwConfigurationError();
+    }
+    const val = app[prop];
+    return typeof val === 'function' ? val.bind(app) : val;
+  }
+});
+
+const adminDb = new Proxy({}, {
+  get(target, prop) {
+    const db = getAdminDbInstance();
+    if (!db) {
+      if (process.env.USE_MOCK_DATA === 'true') {
+        return null;
+      }
+      throwConfigurationError();
+    }
+    const val = db[prop];
+    return typeof val === 'function' ? val.bind(db) : val;
+  }
+});
 
 export { adminApp, adminDb };
