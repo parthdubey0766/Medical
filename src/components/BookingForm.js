@@ -77,6 +77,7 @@ export default function BookingForm() {
   const [slotsLoading, setSlotsLoading] = useState(!IS_PREVIEW_SITE);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
+  const [bookingResult, setBookingResult] = useState(null);
   const [form, setForm] = useState(() => ({
     name: "",
     phone: "+91-",
@@ -170,9 +171,17 @@ export default function BookingForm() {
         throw new Error(getApiMessage(result));
       }
 
+      const ref = result.data.bookingRef;
+      setBookingResult({
+        bookingRef: ref,
+        name: form.name,
+        date: form.preferredDate,
+        timeSlot: form.preferredTimeSlot,
+        reason: form.reason,
+      });
       setStatus({
         kind: "success",
-        message: `Appointment confirmed. Reference: ${result.data.bookingRef}`,
+        message: `Appointment confirmed. Reference: ${ref}`,
       });
       setForm((current) => ({
         ...current,
@@ -185,6 +194,7 @@ export default function BookingForm() {
         marketingConsent: false,
       }));
     } catch (error) {
+      setBookingResult(null);
       setStatus({ kind: "error", message: error.message });
     } finally {
       setSubmitting(false);
@@ -377,9 +387,36 @@ export default function BookingForm() {
       </label>
 
       {status ? (
-        <p className={styles.statusMessage} data-kind={status.kind} aria-live="polite">
-          {status.message}
-        </p>
+        <div aria-live="polite">
+          <p className={styles.statusMessage} data-kind={status.kind}>
+            {status.message}
+          </p>
+          {status.kind === "success" && bookingResult && (
+            <a
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919876543210"}?text=${encodeURIComponent(
+                `Hi, I just booked an appointment.\n\n` +
+                `📋 Ref: ${bookingResult.bookingRef}\n` +
+                `👤 Name: ${bookingResult.name}\n` +
+                `📅 Date: ${bookingResult.date}\n` +
+                `⏰ Slot: ${bookingResult.timeSlot}\n` +
+                `💬 Reason: ${bookingResult.reason}\n\n` +
+                `Please confirm. Thank you!`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.button}
+              style={{
+                background: "linear-gradient(135deg, #25D366, #128C7E)",
+                marginTop: "0.75rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+              }}
+            >
+              💬 Share on WhatsApp
+            </a>
+          )}
+        </div>
       ) : null}
 
       <button

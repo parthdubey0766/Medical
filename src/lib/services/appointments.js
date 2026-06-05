@@ -6,11 +6,12 @@
  * Switches between Firestore and mock data based on USE_MOCK_DATA env var.
  */
 import { adminDb } from '@/lib/firebaseAdmin';
+import { isFirebaseAdminAvailable } from '@/lib/firebaseAdmin';
 import { addMockAppointment, getMockAppointments, deleteMockAppointment } from '@/lib/mockData';
 import { generateBookingRef, normalizePhone, sanitizeObject } from '@/lib/sanitize';
 import { markSlotBooked, isSlotAvailable } from './slots';
 
-const IS_MOCK = process.env.USE_MOCK_DATA === 'true';
+const IS_MOCK = !isFirebaseAdminAvailable();
 
 /**
  * Create a new appointment booking.

@@ -11,6 +11,22 @@ import { getFirestore } from 'firebase-admin/firestore';
 let cachedAdminApp = null;
 let cachedAdminDb = null;
 
+function hasFirebaseAdminConfig() {
+  return Boolean(
+    process.env.FIREBASE_ADMIN_PROJECT_ID &&
+    process.env.FIREBASE_ADMIN_CLIENT_EMAIL &&
+    process.env.FIREBASE_ADMIN_PRIVATE_KEY
+  );
+}
+
+function isFirebaseAdminAvailable() {
+  if (process.env.USE_MOCK_DATA === 'true') {
+    return false;
+  }
+
+  return Boolean(getAdminDbInstance());
+}
+
 function getAdminAppInstance() {
   if (getApps().length > 0) {
     return getApps()[0];
@@ -126,4 +142,4 @@ const adminDb = new Proxy({}, {
   }
 });
 
-export { adminApp, adminDb };
+export { adminApp, adminDb, hasFirebaseAdminConfig, isFirebaseAdminAvailable };

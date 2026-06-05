@@ -5,10 +5,11 @@
  * Stores in Firestore (or mock) and triggers notifications.
  */
 import { adminDb } from '@/lib/firebaseAdmin';
+import { isFirebaseAdminAvailable } from '@/lib/firebaseAdmin';
 import { addMockContact, deleteMockContact } from '@/lib/mockData';
 import { sanitizeObject, normalizePhone } from '@/lib/sanitize';
 
-const IS_MOCK = process.env.USE_MOCK_DATA === 'true';
+const IS_MOCK = !isFirebaseAdminAvailable();
 
 /**
  * Create a new contact form submission.

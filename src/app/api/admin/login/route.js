@@ -34,7 +34,7 @@ export async function POST(request) {
     const { password } = body;
 
     // Require an explicit environment variable — no hardcoded fallback.
-    const validPassword = process.env.ADMIN_PASSWORD;
+    const validPassword = (process.env.ADMIN_PASSWORD || '').trim();
     if (!validPassword) {
       console.error('[AdminLogin] ADMIN_PASSWORD environment variable is not set');
       return errorResponse('Admin login is not configured', 503);

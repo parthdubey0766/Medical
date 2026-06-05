@@ -32,6 +32,7 @@ export default function Footer() {
             <a href="tel:+919876543210">+91-9876543210</a>
             <a href="mailto:clinic@parthsclinic.com">clinic@parthsclinic.com</a>
             <Link href="/privacy">Privacy and data requests</Link>
+            <Link href="/admin">Admin login</Link>
           </div>
         </div>
       </div>

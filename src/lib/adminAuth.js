@@ -18,7 +18,7 @@ const MAX_AGE_SECONDS = 60 * 60 * 24; // 1 day
  * @returns {string}
  */
 function getSecret() {
-  return process.env.ADMIN_PASSWORD || '';
+  return (process.env.ADMIN_PASSWORD || '').trim();
 }
 
 /**

@@ -5,9 +5,10 @@
  * Switches between Firestore and mock data based on USE_MOCK_DATA env var.
  */
 import { adminDb } from '@/lib/firebaseAdmin';
+import { isFirebaseAdminAvailable } from '@/lib/firebaseAdmin';
 import { generateMockSlots, CLINIC_HOURS } from '@/lib/mockData';
 
-const IS_MOCK = process.env.USE_MOCK_DATA === 'true';
+const IS_MOCK = !isFirebaseAdminAvailable();
 
 /**
  * Get available time slots for a specific date.

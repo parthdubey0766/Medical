@@ -6,7 +6,7 @@
  * block the main operation (booking, contact form, etc.).
  */
 import { sendBookingConfirmation, sendContactAcknowledgement, sendDpdpAcknowledgement } from './email';
-import { sendBookingConfirmationSMS } from './sms';
+import { sendBookingConfirmationSMS, sendWhatsAppToAdmin } from './sms';
 import { maskEmail, maskPhone } from '@/lib/sanitize';
 
 /**
@@ -17,10 +17,10 @@ import { maskEmail, maskPhone } from '@/lib/sanitize';
  * @returns {Promise<{ email: boolean, sms: boolean }>}
  */
 export async function notifyBookingConfirmation(booking) {
-  const results = { email: false, sms: false };
+  const results = { email: false, sms: false, whatsapp: false };
 
   try {
-    const [emailResult, smsResult] = await Promise.allSettled([
+    const [emailResult, smsResult, whatsappResult] = await Promise.allSettled([
       sendBookingConfirmation({
         to: booking.email,
         name: booking.name,
@@ -36,15 +36,26 @@ export async function notifyBookingConfirmation(booking) {
         date: booking.preferredDate,
         timeSlot: booking.preferredTimeSlot,
       }),
+      sendWhatsAppToAdmin({
+        name: booking.name,
+        phone: booking.phone,
+        bookingRef: booking.bookingRef,
+        date: booking.preferredDate,
+        timeSlot: booking.preferredTimeSlot,
+        reason: booking.reason,
+        age: booking.age,
+      }),
     ]);
 
     results.email = emailResult.status === 'fulfilled' && emailResult.value?.success;
     results.sms = smsResult.status === 'fulfilled' && smsResult.value?.success;
+    results.whatsapp = whatsappResult.status === 'fulfilled' && whatsappResult.value?.success;
 
     console.log('[Notifications] Booking confirmation sent:', {
       bookingRef: booking.bookingRef,
       email: results.email ? `✅ ${maskEmail(booking.email)}` : '❌ Failed',
       sms: results.sms ? `✅ ${maskPhone(booking.phone)}` : '❌ Failed',
+      whatsapp: results.whatsapp ? '✅ Admin notified' : '❌ Failed',
     });
   } catch (error) {
     console.error('[Notifications] Unexpected error in booking notifications:', error);

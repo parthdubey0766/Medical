@@ -4,9 +4,7 @@ const basePath = isGitHubPages && repositoryName ? `/${repositoryName}` : undefi
 const shouldExport = process.env.NEXT_PUBLIC_PREVIEW_MODE === 'true';
 
 // Determine the site URL for CORS and CSP
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
-);
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://parth06.app';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

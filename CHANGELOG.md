@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2026-06-02
 
+### Fixed
+- **Booking Backend**: Added a safe fallback to mock mode when Firebase Admin credentials are missing or invalid so the app no longer returns a generic 500 on booking and slot routes.
+- **Custom Domain**: Aligned the runtime site URL defaults with `parth06.app` to keep metadata, CSP, and CORS consistent in production.
+
 ### Added
 - **Admin Dashboard**: Created a secure `/admin` page (password protected) for the doctor to manage and view all appointments and contact messages directly on the website without needing to log into the Firebase Console.
 - **Form Defaults**: Contact, Booking, and Data Request forms now automatically pre-fill `+91-` for convenience.
